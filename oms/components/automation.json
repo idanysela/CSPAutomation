@@ -47,6 +47,12 @@
         },
         "templateStorage": {
             "type": "string"
+        },
+        "currentDate": {
+            "type": "string",
+            "metadata": {
+                "description": "should be in the format yyyy-mm-dd"
+            }
         }
     },
     "variables": {},
@@ -203,6 +209,37 @@
                             "JsonParameterList":""
                         }
                     }
+                },
+                {
+                    "name": "DailyNight",
+                    "type": "Microsoft.Automation/AutomationAccounts/Schedules",
+                    "apiVersion": "2015-10-31",
+                    "properties": {
+                      "description": "",
+                      "startTime": "[concat(parameters('currentDate'),'T01:00:00+00:00')]",
+                      "frequency": "Day"
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ]
+                },
+                {
+                    "name": "[guid('DailyNight','OnboardVMsForOMS')]",
+                    "type": "Microsoft.Automation/AutomationAccounts/JobSchedules",
+                    "apiVersion": "2015-10-31",
+                    "properties": {
+                      "schedule": {
+                        "name": "DailyNight"
+                      },
+                      "runbook": {
+                        "name": "OnboardVMsForOMS"
+                      }
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/runbooks/', 'OnboardVMsForOMS')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/schedules/', 'DailyNight')]"
+                    ]
                 }
             ]
         },

@@ -69,6 +69,12 @@
           "description": "Enter the pwd for the service principal user. The pwd is enrypted during runtime and in the Automation assets"
         }
     },
+    "currentDate": {
+        "type": "string",
+        "metadata": {
+            "description": "should be in the format yyyy-mm-dd"
+        }
+    }
 },
 "variables": {
     "workspaceName": "[concat('oms-',parameters('EnvironmentName'))]"
@@ -147,6 +153,9 @@
                 },
                 "templateStorage": {
                     "value": "[parameters('templateStorage')]"
+                },
+                "currentDate": {
+                    "value": "[parameters('currentDate')]"
                 }
             }
       }

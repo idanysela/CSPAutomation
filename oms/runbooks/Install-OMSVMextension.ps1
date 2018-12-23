@@ -33,9 +33,10 @@ param (
 try 
 {
     # Connect to Azure using service principal auth
-    $ServicePrincipalConnection =  Get-AutomationPSCredential -Name $AzureCredentialsAssetName         
+    $ServicePrincipalConnection =  Get-AutomationPSCredential -Name $AzureCredentialsAssetName 
+    $tenantId = Get-AutomationVariable -Name "TenantId"        
     Write-Output "Logging in to Azure..."
-    $Null = add-azurermaccount -Credential $ServicePrincipalConnection 
+    $Null = add-azurermaccount -Credential $ServicePrincipalConnection -TenantId $tenantId -ServicePrincipal
 }
 catch 
 {

@@ -79,6 +79,19 @@
                     }
                 },
                 {
+                    "name": "TenantId",
+                    "type": "variables",
+                    "apiVersion": "2015-10-31",
+                    "dependsOn": [
+                      "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "description": "OMS Tenant Id",
+                      "value": "[subscription().tenantId]"
+                    }
+                },
+                {
                     "name": "WorkspaceId",
                     "type": "variables",
                     "apiVersion": "2015-10-31",
@@ -129,6 +142,7 @@
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceId')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceKey')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'TenantId')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'OMSMonitoredSubscriptions')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/credentials/', 'AzureSP')]"
                     ],
@@ -153,6 +167,7 @@
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceId')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceKey')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'TenantId')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'OMSMonitoredSubscriptions')]",
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/credentials/', 'AzureSP')]"
                     ],

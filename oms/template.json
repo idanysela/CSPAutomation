@@ -1,0 +1,155 @@
+{
+"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+"contentVersion": "1.0.0.0",
+"parameters": {
+    "templateStorage": {
+        "type": "string"
+    },
+    "EnvironmentName": {
+        "type": "string"
+    },
+    "resourceLocation": {
+        "type": "String",
+        "allowedValues": [
+            "East US",
+            "West Europe",
+            "Southeast Asia",
+            "Australia Southeast"
+        ],
+        "defaultValue": "West Europe",
+        "metadata": {
+          "description": "Specifies the location"
+        }
+    },
+    "workspaceSku": {
+        "type": "String",
+        "allowedValues": [
+          "Standalone",
+          "PerNode",
+          "PerGB2018"
+        ],
+        "defaultValue": "PerGB2018",
+        "metadata": {
+            "description": "Specifies the service tier of the workspace: Standalone, PerNode, Per-GB"
+        }
+    },
+    "retentionDays": {
+        "type": "int",
+        "defaultValue": 30,
+        "minValue": 7,
+        "maxValue": 180
+    },
+    "perfSampleRate": {
+        "type": "int",
+        "defaultValue": 60,
+        "minValue": 10,
+        "maxValue": 300
+    },
+    "automationSku": {
+        "type": "string",
+        "allowedValues": [
+          "Free",
+          "Basic",
+          "OMS"
+        ],
+        "defaultValue": "OMS",
+        "metadata": {
+        "description": "Specifies the service tier of the workspace: Free, Basic, OMS"
+        }
+    },
+    "azureSP": {
+        "type": "string",
+        "metadata": {
+          "description": "Enter your service principal user"
+        }
+    },
+    "azureSPPwd": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Enter the pwd for the service principal user. The pwd is enrypted during runtime and in the Automation assets"
+        }
+    },
+},
+"variables": {
+    "workspaceName": "[concat('oms-',parameters('EnvironmentName'))]"
+},
+"resources": [
+    {
+        "type": "Microsoft.Resources/resourceGroups",
+        "apiVersion": "2018-05-01",
+        "location": "[parameters('resourceLocation')]",
+        "name": "[parameters('EnvironmentName')]",
+        "properties": {}
+    },
+    {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "name": "Workspace",
+        "resourceGroup": "[parameters('EnvironmentName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Resources/resourceGroups/', parameters('EnvironmentName'))]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri":"[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms/components/workspace.json')]",
+               "contentVersion":"1.0.0.0"
+            },
+            "parameters": {
+                "workspaceName": {
+                    "value": "[variables('workspaceName')]"
+                },
+                "location": {
+                    "value": "[parameters('resourceLocation')]"
+                },
+                "sku": {
+                    "value": "[parameters('workspaceSku')]"
+                },
+                "retentionDays": {
+                    "value": "[parameters('retentionDays')]"
+                },
+                "perfSampleRate": {
+                    "value": "[parameters('perfSampleRate')]"
+                }
+            }
+      }
+    },
+    {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "name": "Automation",
+        "resourceGroup": "[parameters('EnvironmentName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Resources/resourceGroups/', parameters('EnvironmentName'))]",
+            "[concat('Microsoft.Resources/deployments/', 'Workspace')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri":"[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms/components/automation.json')]",
+               "contentVersion":"1.0.0.0"
+            },
+            "parameters": {
+                "workspaceName": {
+                    "value": "[variables('workspaceName')]"
+                },
+                "location": {
+                    "value": "[parameters('resourceLocation')]"
+                },
+                "sku": {
+                    "value": "[parameters('automationSku')]"
+                },
+                "azureSP": {
+                    "value": "[parameters('azureSP')]"
+                },
+                "azureSPPwd": {
+                    "value": "[parameters('azureSPPwd')]"
+                },
+                "templateStorage": {
+                    "value": "[parameters('templateStorage')]"
+                }
+            }
+      }
+    }
+   ]
+}

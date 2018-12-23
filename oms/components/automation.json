@@ -1,0 +1,207 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "String",
+            "metadata": {
+              "description": "Specifies the name of the workspace."
+            }
+        },
+        "location": {
+            "type": "String",
+            "allowedValues": [
+                "East US",
+                "West Europe",
+                "Southeast Asia",
+                "Australia Southeast"
+            ],
+            "defaultValue": "West Europe",
+            "metadata": {
+              "description": "Specifies the location in which to create the workspace."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+              "Free",
+              "Basic",
+              "OMS"
+            ],
+            "defaultValue": "OMS",
+            "metadata": {
+            "description": "Specifies the service tier of the workspace: Free, Basic, OMS"
+            }
+        },
+        "azureSP": {
+            "type": "string",
+            "metadata": {
+              "description": "Enter your service principal user"
+            }
+        },
+        "azureSPPwd": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Enter the pwd for the service principal user. The pwd is enrypted during runtime and in the Automation assets"
+            }
+        },
+        "templateStorage": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('workspaceName')]",
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2015-01-01-preview",
+            "location": "[parameters('location')]",
+            "dependsOn": [ ],
+            "tags": { },
+            "properties": {
+              "sku": {
+                "name": "[parameters('sku')]"
+              }
+            },
+            "resources": [
+                {
+                    "name": "AzureSP",
+                    "type": "credentials",
+                    "apiVersion": "2015-10-31",
+                    "dependsOn": [
+                      "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "description": "Azure Subscription Credentials",
+                      "password": "[parameters('azureSPPwd')]",
+                      "userName": "[parameters('azureSP')]"
+                    }
+                },
+                {
+                    "name": "WorkspaceId",
+                    "type": "variables",
+                    "apiVersion": "2015-10-31",
+                    "dependsOn": [
+                      "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "description": "OMS Workspace Id",
+                      "value": "[concat('\"',reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')),'2015-11-01-preview').customerId,'\"')]"
+                    }
+                },
+                {
+                    "name": "WorkspaceKey",
+                    "type": "variables",
+                    "apiVersion": "2015-10-31",
+                    "dependsOn": [
+                      "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "description": "OMS Workspace key",
+                      "value": "[concat('\"',listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName')), '2015-11-01-preview').primarySharedKey,'\"')]"
+                    }
+                },
+                {
+                    "name": "OMSMonitoredSubscriptions",
+                    "type": "variables",
+                    "apiVersion": "2015-10-31",
+                    "dependsOn": [
+                      "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+                    ],
+                    "tags": {
+                    },
+                    "properties": {
+                      "description": "Azure Subscription Ids",
+                      "isEncrypted": 0,
+                      "type": "string",
+                      "value": "[concat('\"',subscription().subscriptionId,'\"')]"
+                    }
+                },
+                {
+                    "name": "Install-OMSVMExtension",
+                    "type": "runbooks",
+                    "apiVersion": "2015-10-31",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceId')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceKey')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'OMSMonitoredSubscriptions')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/credentials/', 'AzureSP')]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "runbookType": "PowerShell",
+                      "logProgress": "false",
+                      "logVerbose": "false",
+                      "description": "",
+                      "publishContentLink": {
+                        "uri":  "[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms','/runbooks/Install-OMSVMextension.ps1')]",
+                        "version": "1.0.0.0"
+                      }
+                    }
+                  },
+                  {
+                    "name": "OnboardVMsForOMS",
+                    "type": "runbooks",
+                    "apiVersion": "2015-10-31",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceId')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'WorkspaceKey')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/variables/', 'OMSMonitoredSubscriptions')]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/credentials/', 'AzureSP')]"
+                    ],
+                    "tags": { },
+                    "properties": {
+                      "runbookType": "PowerShell",
+                      "logProgress": "false",
+                      "logVerbose": "false",
+                      "description": "",
+                      "publishContentLink": {
+                        "uri":  "[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms','/runbooks/Onboard-VMsForOMS.ps1')]",
+                        "version": "1.0.0.0"
+                      }
+                    }
+                  },
+                  {
+                    "name": "[guid(uniqueString(subscription().subscriptionId, resourceGroup().id, deployment().name, 'OnboardVMsForOMS'))]" ,
+                    "type": "jobs",
+                    "apiVersion": "2015-10-31",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'), '/runbooks/','OnboardVMsForOMS')]"
+                    ],
+                    "tags": {
+                        "key": "value"
+                    },
+                    "properties": {
+                        "runbook": {
+                            "name": "OnboardVMsForOMS"
+                        },
+                        "parameters":{
+                            "JsonParameterList":""
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces/linkedServices",
+            "name": "[concat(parameters('workspaceName'), '/' , 'Automation')]",
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('location')]",
+            "properties": {
+                "resourceId": "[resourceId('Microsoft.Automation/automationAccounts',parameters('workspaceName'))]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Automation/automationAccounts/', parameters('workspaceName'))]"
+            ]
+        }
+    ]
+}

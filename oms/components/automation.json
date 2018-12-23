@@ -169,7 +169,7 @@
                     }
                   },
                   {
-                    "name": "[concat('OnboardVMsForOMS','_firstrun_',uniqueString(subscription().subscriptionId, resourceGroup().id, deployment().name, 'OnboardVMsForOMS'))]" ,
+                    "name": "[guid('OnboardVMsForOMS','_firstrun_',uniqueString(subscription().subscriptionId, resourceGroup().id, deployment().name))]" ,
                     "type": "jobs",
                     "apiVersion": "2015-10-31",
                     "location": "[parameters('location')]",

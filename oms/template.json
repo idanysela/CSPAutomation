@@ -92,7 +92,7 @@
         "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri":"[concat(parameters('templateStorage'),'/components/workspace.json')]",
+               "uri":"[concat(parameters('templateStorage'),'/oms/components/workspace.json')]",
                "contentVersion":"1.0.0.0"
             },
             "parameters": {

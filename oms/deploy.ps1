@@ -1,4 +1,5 @@
 $pass = ConvertTo-SecureString -AsPlainText -Force -String 'Myaw$0meKey' 
-$sp=New-AzureRmADServicePrincipal -DisplayName "OMSAutomation" -Password $pass
-New-AzureRmRoleAssignment  -ApplicationId $sp.Id -RoleDefinitionName Contributor 
-New-AzureRmDeployment -Name deployoms -TemplateFile .\template.json -templateStorage csb634336f30983x4d4dxbe4 -EnvironmentName omstest -Location "west europe" -workspaceSku PerNode
+$azureAdApplication = New-AzureRmADApplication -DisplayName "OMSAutomation" -HomePage "https://OMSAutomation.org" -IdentifierUris "https://OMSAutomation.org/omstest" -Password $pass
+$sp=New-AzureRmADServicePrincipal -ApplicationId $azureAdApplication.ApplicationId  
+New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $azureAdApplication.ApplicationId.Guid
+New-AzureRmDeployment -Name deployoms -TemplateFile .\template.json -templateStorage "https://raw.githubusercontent.com/idanysela/CSPAutomation/master" -EnvironmentName omstest -Location "west europe" -workspaceSku PerNode -azureSP $azureAdApplication.ApplicationId -azureSPPwd $pass -currentDate (Get-date).adddays(1).ToString('yyyy-MM-dd')

@@ -212,7 +212,7 @@
                 },
                 {
                     "name": "DailyNight",
-                    "type": "Microsoft.Automation/AutomationAccounts/Schedules",
+                    "type": "schedules",
                     "apiVersion": "2015-10-31",
                     "properties": {
                       "description": "",
@@ -225,7 +225,7 @@
                 },
                 {
                     "name": "[guid('DailyNight','OnboardVMsForOMS')]",
-                    "type": "Microsoft.Automation/AutomationAccounts/JobSchedules",
+                    "type": "JobSchedules",
                     "apiVersion": "2015-10-31",
                     "properties": {
                       "schedule": {

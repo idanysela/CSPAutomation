@@ -51,7 +51,7 @@ catch
 }
 
 Write-Output "Selecting Subscription $($subId)"
-Select-AzureRmSubscription -SubscriptionId $subId
+Select-AzureRmSubscription -SubscriptionId $subId -Tenant $tenantId
 
 # If there is a specific resource group, then get all VMs in the resource group,
 $VM = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VMName 

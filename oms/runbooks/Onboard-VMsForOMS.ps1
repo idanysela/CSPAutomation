@@ -51,19 +51,18 @@ $subIdList = $subIdSubNameList.Split(",")
 ForEach ($subId in $subIdList) 
 {
 
-    $subIdDetails = Get-AzureRmSubscription -SubscriptionId $subId
-    if ($subIdDetails -eq $null) 
-    {
-        Write-Output "Cannot get subscription for subId $($subId) check service principal and permissions"
-        Continue
-    }	
+    #$subIdDetails = Get-AzureRmSubscription -SubscriptionId $subId
+    #if ($subIdDetails -eq $null) 
+    #{
+    #    Write-Output "Cannot get subscription for subId $($subId) check service principal and permissions"
+    #    Continue
+    #}	
 	
-    Select-AzureRmSubscription -SubscriptionId $subId
-    $subInfo = Select-AzureRmSubscription -SubscriptionId $subId
-    if ($subInfo -ne $null) 
-    {
-        $subIdSubNameList.Add($subInfo.Subscription.SubscriptionId, $subInfo.Subscription.SubscriptionName)
-    }
+    $subInfo = Select-AzureRmSubscription -SubscriptionId $subId -Tenant $tenantId
+    #if ($subInfo -ne $null) 
+    #{
+    #    $subIdSubNameList.Add($subInfo.Subscription.SubscriptionId, $subInfo.Subscription.SubscriptionName)
+    #}
 
     $VMs = Get-AzureRmVM | Where { $_.StorageProfile.OSDisk.OSType -eq "Windows" -or  $_.StorageProfile.OSDisk.OSType -eq "Linux" }
 

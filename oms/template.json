@@ -92,7 +92,7 @@
         "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri":"[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms/components/workspace.json')]",
+               "uri":"[concat(parameters('templateStorage'),'/components/workspace.json')]",
                "contentVersion":"1.0.0.0"
             },
             "parameters": {
@@ -126,7 +126,7 @@
         "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri":"[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms/components/automation.json')]",
+               "uri":"[concat(parameters('templateStorage'),'/oms/components/automation.json')]",
                "contentVersion":"1.0.0.0"
             },
             "parameters": {

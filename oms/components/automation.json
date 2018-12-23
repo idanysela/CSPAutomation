@@ -139,7 +139,7 @@
                       "logVerbose": "false",
                       "description": "",
                       "publishContentLink": {
-                        "uri":  "[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms','/runbooks/Install-OMSVMextension.ps1')]",
+                        "uri":  "[concat(parameters('templateStorage'),'/oms/runbooks/Install-OMSVMextension.ps1')]",
                         "version": "1.0.0.0"
                       }
                     }
@@ -163,7 +163,7 @@
                       "logVerbose": "false",
                       "description": "",
                       "publishContentLink": {
-                        "uri":  "[concat('https://',parameters('templateStorage'),'.blob.core.windows.net/deploy/oms','/runbooks/Onboard-VMsForOMS.ps1')]",
+                        "uri":  "[concat(parameters('templateStorage'),'/oms/runbooks/Onboard-VMsForOMS.ps1')]",
                         "version": "1.0.0.0"
                       }
                     }

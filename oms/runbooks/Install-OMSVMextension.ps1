@@ -62,14 +62,16 @@ if($VM -eq $null)
 }
  
 $ExtentionNameAndTypeValue = 'MicrosoftMonitoringAgent'
+$ExtVersion='1.0'
 
 if ($VM.StorageProfile.OSDisk.OSType -eq "Linux") 
 {
     $ExtentionNameAndTypeValue = 'OmsAgentForLinux'	
+    $ExtVersion='1.7'
 }
 
 $vmId = $VM.Id
-$Rtn = Set-AzureRmVMExtension -ResourceGroupName $VM.ResourceGroupName -VMName $VM.Name -Name $ExtentionNameAndTypeValue -Publisher 'Microsoft.EnterpriseCloud.Monitoring' -ExtensionType $ExtentionNameAndTypeValue -TypeHandlerVersion '1.0' -Location $VM.Location -SettingString "{'workspaceId': '$workspaceId', 'azureResourceId':'$vmId'}" -ProtectedSettingString "{'workspaceKey': '$workspaceKey'}" 
+$Rtn = Set-AzureRmVMExtension -ResourceGroupName $VM.ResourceGroupName -VMName $VM.Name -Name $ExtentionNameAndTypeValue -Publisher 'Microsoft.EnterpriseCloud.Monitoring' -ExtensionType $ExtentionNameAndTypeValue -TypeHandlerVersion $ExtVersion -Location $VM.Location -SettingString "{'workspaceId': '$workspaceId', 'azureResourceId':'$vmId'}" -ProtectedSettingString "{'workspaceKey': '$workspaceKey'}" 
 
 if ($Rtn -eq $null) 
 {

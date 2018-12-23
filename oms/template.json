@@ -159,6 +159,55 @@
                 }
             }
       }
+    },
+    {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "name": "MemoryAlert",
+        "resourceGroup": "[parameters('EnvironmentName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Resources/resourceGroups/', parameters('EnvironmentName'))]",
+            "[concat('Microsoft.Resources/deployments/', 'Workspace')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri":"[concat(parameters('templateStorage'),'/oms/components/alert.json')]",
+               "contentVersion":"1.0.0.0"
+            },
+            "parameters": {
+                "workspaceName": {
+                    "value": "[variables('workspaceName')]"
+                },
+                "DisplayNameOfSearch": {
+                    "value": "Memory Utilization % > 90% Over 5 minutes"
+                },
+                "UniqueNameOfSearch": {
+                    "value": "Memory-Utilization-90"
+                },
+                "SearchQuery": {
+                    "value": "Perf | where ObjectName == \"Memory\" | where CounterName == \"% Committed Bytes In Use\" | summarize AggregatedValue = avg(CounterValue) by Computer, bin(TimeGenerated, 5min)"
+                },
+                "Severity": {
+                    "value": "Critical"
+                },
+                "AggregateValueOperator": {
+                    "value": "gt"
+                },
+                "AggregateValue": {
+                    "value": 90
+                },
+                "TriggerAlertCondition": {
+                    "value": "Total"
+                },
+                "TriggerAlertOperator": {
+                    "value": "gt"
+                },
+                "TriggerAlertValue": {
+                    "value": 0
+                }
+            }
+      }
     }
    ]
 }

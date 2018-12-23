@@ -90,7 +90,7 @@ ForEach ($subId in $subIdList)
         }
 
         Start-Sleep -s 2 # just not to hit trottle limit
-    	$InstallJobId =    Start-AutomationRunbook -Name $InstallOMSVMExtensionRunbookName -Parameters @{'AzureCredentialsAssetName'=$AzureCredentialsAssetName;'subId'=$subId;'VMName'=$VM.Name;'ResourceGroupName'=$VM.ResourceGroupName;'workspaceId'=$workspaceId;'workspaceKey'=$workspaceKey}
+    	$InstallJobId =    Start-AutomationRunbook -Name $InstallOMSVMExtensionRunbookName -Parameters @{'AzureCredentialsAssetName'=$AzureCredentialsAssetName;'subId'=$subId;'VMName'=$VM.Name;'ResourceGroupName'=$VM.ResourceGroupName;'workspaceId'=$workspaceId.ToString();'workspaceKey'=$workspaceKey.ToString()}
 	    if($InstallJobId -ne $null)
 	    {
 	        Write-Output "Extension installation Job started with JobId $($InstallJobId) on VM $($VM.Name)"

@@ -1,0 +1,197 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "Description": "Name of Log Analytics workspace"
+            }
+        },
+        "EmailRecipients": {
+            "type": "string",
+            "defaultValue":"cloudsupport@sela.co.il",
+            "metadata": {
+                "Description": "List of recipients for the email alert separated by semicolon"
+            }
+        },
+        "DisplayNameOfSearch": {
+            "type": "string",
+            "defaultValue": "Memory Utilization % > 90% Over 5 minutes",
+            "metadata": {
+                "Description": "Name of search query"
+            }
+        },
+        "UniqueNameOfSearch": {
+            "type": "string",
+            "defaultValue": "Memory-Utilization-90",
+            "metadata": {
+                "Description": "Unique Name Of Search. Please dont use special characters"
+            }
+        },
+        "Description": {
+            "type": "string",
+            "defaultValue": "Description",
+            "metadata": {
+                "Description": "Unique Name Of Search. Please dont use special characters"
+            }
+        },
+        "SearchQuery": {
+            "type": "string",
+            "defaultValue": "Perf | where ObjectName == \"Memory\" | where CounterName == \"% Committed Bytes In Use\" | summarize AggregatedValue = avg(CounterValue) by Computer, bin(TimeGenerated, 5min)",
+            "metadata": {
+                "Description": "SearchQuery. Please remember to use '' in powershell or escape character \" from ARM"
+            }
+        },
+        "Severity": {
+            "type": "string",
+            "allowedValues": [
+                "Critical",
+                "Warning",
+                "Informational"
+            ],
+            "defaultValue": "Critical",
+            "metadata": {
+                "Description": "Severity of alert"
+            }
+        },
+        "TimeWindow": {
+            "type": "int",
+            "defaultValue": 10,
+            "minValue": 5,
+            "maxValue": 1440,
+            "metadata": {
+                "Description": "Length of time in minutes over which to evaluate results. Must be greater than or equal to AlertFrequency"
+            }
+        },
+        "AlertFrequency": {
+            "type": "int",
+            "defaultValue": 5,
+            "minValue": 5,
+            "maxValue": 1440,
+            "metadata": {
+                "Description": "How often the query runs in minutes."
+            }
+        },
+        "AggregateValueOperator": {
+            "type": "string",
+            "allowedValues": [
+                "gt",
+                "lt"
+            ],
+            "defaultValue": "gt",
+            "metadata": {
+                "Description": "gt = greater than or lt = less than"
+            }
+        },
+        "AggregateValue": {
+            "type": "int",
+            "defaultValue": 70,
+            "minValue": 0,
+            "maxValue": 10000,
+            "metadata": {
+                "Description": "The value to compare the results"
+            }
+        },
+        "TriggerAlertCondition": {
+            "type": "string",
+            "allowedValues": [
+                "Total",
+                "Consecutive"
+            ],
+            "defaultValue": "Total",
+            "metadata": {
+                "Description": "Total or Consecutive"
+            }
+        },
+        "TriggerAlertOperator": {
+            "type": "string",
+            "allowedValues": [
+                "gt",
+                "eq"
+            ],
+            "defaultValue": "gt",
+            "metadata": {
+                "Description": "gt = greater than or eq = equal to"
+            }
+        },
+        "TriggerAlertValue": {
+            "type": "int",
+            "defaultValue": 0,
+            "minValue": 0,
+            "maxValue": 10000,
+            "metadata": {
+                "Description": "Number of the times the criteria must be met to trigger the alert."
+            }
+        }
+    },
+    "variables": {
+        "LogAnalyticsApiVersion": "2017-03-03-preview",
+        "Category": "Alert",
+        "ScheduleName": "[toLower(concat('schedule-', parameters('UniqueNameOfSearch'), '-', uniqueString(resourceGroup().id, deployment().name)))]",
+        "AlertName": "[toLower(concat('alert-', parameters('UniqueNameOfSearch'), '-', uniqueString(resourceGroup().id, deployment().name) ))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('workspaceName'), '/', parameters('UniqueNameOfSearch'))]",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+            "apiVersion": "[variables('LogAnalyticsApiVersion')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "etag": "*",
+                "query": "[parameters('SearchQuery')]",
+                "displayName": "[parameters('DisplayNameOfSearch')]",
+                "category": "[variables('Category')]"
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/', parameters('UniqueNameOfSearch'), '/', variables('ScheduleName'))]",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/",
+            "apiVersion": "[variables('LogAnalyticsApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'), '/savedSearches/', parameters('UniqueNameOfSearch'))]"
+            ],
+            "properties": {
+                "etag": "*",
+                "Interval": "[parameters('AlertFrequency')]",
+                "QueryTimeSpan": "[parameters('TimeWindow')]",
+                "Enabled": true
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/', parameters('UniqueNameOfSearch'), '/', variables('ScheduleName'), '/', variables('AlertName'))]",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/actions",
+            "apiVersion": "[variables('LogAnalyticsApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'), '/savedSearches/', parameters('UniqueNameOfSearch'), '/schedules/', variables('ScheduleName'))]"
+            ],
+            "properties": {
+                "etag": "*",
+                "Type": "Alert",
+                "Name": "[parameters('DisplayNameOfSearch')]",
+                "Description": "[parameters('Description')]",
+                "Severity": "[parameters('Severity')]",
+                "Threshold": {
+                    "Operator": "[parameters('AggregateValueOperator')]",
+                    "Value": "[parameters('AggregateValue')]",
+                    "MetricsTrigger": {
+                        "TriggerCondition": "[parameters('TriggerAlertCondition')]",
+                        "Operator": "[parameters('TriggerAlertOperator')]",
+                        "Value": "[parameters('TriggerAlertValue')]"
+                    }
+                },
+                "Throttling": {
+                    "DurationInMinutes": 30
+                },
+                "EmailNotification": {
+                    "Recipients": [
+                        "[parameters('EmailRecipients')]"
+                    ],
+                    "Subject": "[parameters('DisplayNameOfSearch')]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

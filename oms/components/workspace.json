@@ -308,7 +308,7 @@
                 {
                     "apiVersion": "2015-11-01-preview",
                     "type": "datasources",
-                    "name": "Linux",
+                    "name": "LinuxDisk",
                     "dependsOn": [
                         "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     ],
@@ -335,6 +335,75 @@
                             }
                         ],
                         "objectName": "Logical Disk",
+                        "instanceName": "*",
+                        "intervalSeconds": "[parameters('perfSampleRate')]"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "LinuxMemory",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "% Used Swap Space"
+                            },
+                            {
+                                "counterName": "Available MBytes Memory"
+                            },
+                            {
+                                "counterName": "% Used Memory"
+                            }
+                        ],
+                        "objectName": "Memory",
+                        "instanceName": "*",
+                        "intervalSeconds": "[parameters('perfSampleRate')]"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "LinuxNet",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "Total Bytes Transmitted"
+                            },
+                            {
+                                "counterName": "Total Bytes Received"
+                            }
+                        ],
+                        "objectName": "Network",
+                        "instanceName": "*",
+                        "intervalSeconds": "[parameters('perfSampleRate')]"
+                    }
+                },
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "type": "datasources",
+                    "name": "LinuxCPU",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    ],
+                    "kind": "LinuxPerformanceObject",
+                    "properties": {
+                        "performanceCounters": [
+                            {
+                                "counterName": "% Processor Time"
+                            },
+                            {
+                                "counterName": "% Privileged Time"
+                            }
+                        ],
+                        "objectName": "Processor",
                         "instanceName": "*",
                         "intervalSeconds": "[parameters('perfSampleRate')]"
                     }

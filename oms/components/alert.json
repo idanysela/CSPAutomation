@@ -46,11 +46,11 @@
         "Severity": {
             "type": "string",
             "allowedValues": [
-                "Critical",
-                "Warning",
-                "Informational"
+                "critical",
+                "warning",
+                "informational"
             ],
-            "defaultValue": "Critical",
+            "defaultValue": "critical",
             "metadata": {
                 "Description": "Severity of alert"
             }

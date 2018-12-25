@@ -189,7 +189,7 @@
                     "value": "Perf | where ObjectName == \"Memory\" | where CounterName == \"% Committed Bytes In Use\" | summarize AggregatedValue = avg(CounterValue) by Computer, bin(TimeGenerated, 5min)"
                 },
                 "Severity": {
-                    "value": "Critical"
+                    "value": "critical"
                 },
                 "AggregateValueOperator": {
                     "value": "gt"
